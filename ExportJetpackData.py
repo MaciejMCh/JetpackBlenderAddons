@@ -96,7 +96,7 @@ def register():
     # handle the keymap
     wm = bpy.context.window_manager
     km = wm.keyconfigs.addon.keymaps.new(name='Window', space_type='EMPTY')
-    kmi = km.keymap_items.new(ExportJetpackData.bl_idname, 'SPACE', 'PRESS', ctrl=True, shift=True)
+    kmi = km.keymap_items.new(ExportJetpackData.bl_idname, 'E', 'PRESS', ctrl=True, shift=True)
     addon_keymaps.append(km)
 
 def unregister():
