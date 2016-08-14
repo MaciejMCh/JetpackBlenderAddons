@@ -18,6 +18,13 @@ class ExportJetpackData(bpy.types.Operator):
     def execute(self, context):
         storagePath = os.path.dirname(bpy.data.filepath) + "/3dAssets/"
         # export scenes
+        renderableTypesEnum = [
+        ("UNDEFINED", "Undefined", "", 0),
+        ("REGULAR", "Regular", "", 1),
+        ("REFLECTIVE_SURFACE", "Reflective Surface", "", 2),
+        ("EMITTER", "Emitter", "", 3),
+        ]
+        bpy.types.Object.renderableType = bpy.props.EnumProperty(items=renderableTypesEnum, name="Renderable Type")
         scenesJsonArray = []
         for scene in bpy.data.scenes:
             sceneJsonObject = {}
@@ -31,10 +38,14 @@ class ExportJetpackData(bpy.types.Operator):
                 if ob.type != 'MESH':
                     continue
                 objectJsonObject = {}
-                objectJsonObject['type'] = 'regular'
+                objectJsonObject['type'] = ob.renderableType
+                if ob.renderableType == 'REGULAR':
+                    objectJsonObject['material'] = ob.active_material.name
+                if ob.renderableType == 'EMITTER':
+                    objectJsonObject['type'] = "emitter"
+                    objectJsonObject['color'] = [ob.color[0], ob.color[1], ob.color[2], ob.color[3]]
                 objectJsonObject['name'] = ob.name
                 objectJsonObject['mesh'] = ob.data.name
-                objectJsonObject['material'] = ob.active_material.name
                 objectJsonObject['transformation'] = {}
                 objectJsonObject['transformation']['position'] = [ob.location.x, ob.location.y, ob.location.z]
                 objectJsonObject['transformation']['rotation'] = {}
@@ -55,6 +66,8 @@ class ExportJetpackData(bpy.types.Operator):
             zeroObject.select = True
             bpy.ops.object.select_pattern(pattern=zeroObjectName, extend=False)
             bpy.ops.export_scene.obj(filepath=storagePath+'meshes/'+mesh.name+'.obj', use_selection=True, axis_forward='Y', axis_up='Z', use_triangles=True, use_uvs=True, use_materials=False)
+            bpy.context.screen.scene.objects.unlink(zeroObject)
+            bpy.data.objects.remove(zeroObject)
 
         materialProperties = ["specular_power", "specular_sharpness", "fresnel_a", "fresnel_b"]
         for material in bpy.data.materials:

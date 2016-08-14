@@ -13,32 +13,34 @@ class SetupJetpackData(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-    	renderableTypesEnum = [
+        renderableTypesEnum = [
     	("UNDEFINED", "Undefined", "", 0),
     	("REGULAR", "Regular", "", 1),
-    	("REFLECTIVE_SURFACE", "Reflective Surface", "", 2)
-    	]
+    	("REFLECTIVE_SURFACE", "Reflective Surface", "", 2),
+        ("EMITTER", "Emitter", "", 3)]
+        bpy.types.Object.renderableType = bpy.props.EnumProperty(items=renderableTypesEnum, name="Renderable Type")
+        bpy.types.Mesh.emitter = bpy.props.BoolProperty(name="Emitter")
+        for ob in bpy.data.objects:
+            ob.rotation_mode = 'AXIS_ANGLE'
+            if ob.renderableType == 'UNDEFINED':
+                ob.renderableType = 'REGULAR'
+            if ob.renderableType == 'EMITTER':
+                ob.data.emitter = True
 
-    	bpy.types.Object.renderableType = bpy.props.EnumProperty(items=renderableTypesEnum, name="Renderable Type")
-    	for ob in bpy.data.objects:
-    		ob.rotation_mode = 'AXIS_ANGLE'
-    		if ob.renderableType == 'UNDEFINED':
-    			ob.renderableType = 'REGULAR'
-
-    	bpy.types.Material.specular_power = bpy.props.FloatProperty(name="Specular Power")
-    	bpy.types.Material.specular_sharpness = bpy.props.FloatProperty(name="Specular Sharpness")
-    	bpy.types.Material.fresnel_a = bpy.props.FloatProperty(name="Fresnel A")
-    	bpy.types.Material.fresnel_b = bpy.props.FloatProperty(name="Fresnel B")
-    	for material in bpy.data.materials:
-    		if material.specular_power == 0.0:
-    			material.specular_power = -1.0
-    		if material.specular_sharpness == 0.0:
-    			material.specular_sharpness = -1.0
-    		if material.fresnel_a == 0.0:
-    			material.fresnel_a = -1.0
-    		if material.fresnel_b == 0.0:
-    			material.fresnel_b = -1.0
-    	return {'FINISHED'}
+        bpy.types.Material.specular_power = bpy.props.FloatProperty(name="Specular Power")
+        bpy.types.Material.specular_sharpness = bpy.props.FloatProperty(name="Specular Sharpness")
+        bpy.types.Material.fresnel_a = bpy.props.FloatProperty(name="Fresnel A")
+        bpy.types.Material.fresnel_b = bpy.props.FloatProperty(name="Fresnel B")
+        for material in bpy.data.materials:
+            if material.specular_power == 0.0:
+                material.specular_power = -1.0
+            if material.specular_sharpness == 0.0:
+                material.specular_sharpness = -1.0
+            if material.fresnel_a == 0.0:
+                material.fresnel_a = -1.0
+            if material.fresnel_b == 0.0:
+                material.fresnel_b = -1.0
+        return {'FINISHED'}
 
 
 def menu_func(self, context):
